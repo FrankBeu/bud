@@ -93,6 +93,30 @@ let
     else "$PRJ_ROOT"
   ;
 
+  ### TODO create colorModule -> extract
+  BR = "\u001b[30m";    ### Black
+  CR = "\u001b[36m";    ### Cyan    Reg   category
+  GR = "\u001b[32m";    ### Green   Reg   success,good
+  MR = "\u001b[35m";    ### Magenta Reg
+  RR = "\u001b[31m";    ### Red     Reg   error,danger,stop
+  UR = "\u001b[34m";    ### blUe    Reg   stability,calm
+  WR = "\u001b[37m";    ### White   Reg
+  YR = "\u001b[33m";    ### Yellow  Reg   proceed with caution,warning, in progress
+  BB = "\u001b[30;1m";  ### Black   Bold
+  CB = "\u001b[36;1m";  ### Cyan    Bold
+  GB = "\u001b[32;1m";  ### Green   Bold  success,good
+  MB = "\u001b[35;1m";  ### Magenta Bold
+  RB = "\u001b[31;1m";  ### Red     Bold  error,danger,stop
+  UB = "\u001b[34;1m";  ### blUe    Bold  stability,calm
+  WB = "\u001b[37;1m";  ### White   Bold
+  YB = "\u001b[33;1m";  ### Yellow  Bold  proceed with caution,warning, in progress
+  NE = "\u001b[0m";     ### NoEffects
+
+  ### WORKAROUND: indentation: multiline help-strings have to be indented in the bud-setup in DEVOS
+  ### TODO:       find solution or export and use width for: printf "  %-45b %b\n\n" \
+  columnWidthActual = 48;
+  columnWidth       = columnWidthActual - 3 ; ### printf statements are used with 2 leading and 1 trailing space
+  cw                = builtins.toString columnWidth;
 
   budCmd = pkgs.writeShellScriptBin name ''
 
@@ -135,10 +159,15 @@ let
       shift 4;
       case "$1" in
         "-h"|"help"|"--help")
-          printf "%b\n" \
-                 "" \
-                 "\e[4mUsage\e[0m: $synopsis   $help\n" \
-                 "\e[4mDescription\e[0m:\n$description"
+          printf "\n"
+          printf "  %b\n\n"                    \
+                 "\${UB}Usage\${NE}:"
+          printf "  %-${cw}b %b\n"             \
+                 "''${synopsis}" "''${help}\n"
+          printf "\n  %b\n\n"                  \
+                 "\${UB}Description\${NE}:"
+          printf "  %b\n\n"                    \
+                 "$description"
           ;;
         *)
           FLAKEROOT="$FLAKEROOT" HOST="$HOST" USER="$USER" ARCH="$ARCH" exec $script "$@"
@@ -147,12 +176,16 @@ let
     }
 
     usage () {
-    printf "%b\n" \
-      "" \
-      "\e[4mUsage\e[0m: $(basename $0) COMMAND [ARGS]\n" \
-      "\e[4mCommands\e[0m:"
+    printf "%b\n"                         \
+      ""                                  \
+      "  \${UB}Usage\${NE}: "             \
+      ""                                  \
+      "  $(basename $0) COMMAND [ARGS]\n" \
+      ""                                  \
+      "  \${UB}Commands\${NE}:"           \
+      ""                                  \
 
-    printf "  %-30s %s\n\n" \
+    printf "  %-${cw}b %b\n\n" \
     ${textClosureMap id (addUsage cfg.cmds) (attrNames cfg.cmds)}
 
     }
